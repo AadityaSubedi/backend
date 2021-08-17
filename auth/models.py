@@ -12,19 +12,21 @@ class User:
     }
     """
 
-    collection = "levels"
+    collection = "users"
 
     def __init__(
         self,
         username: str,
         email: str,
         password: str,
+        image:str
 
     ):
         self.username = username
         self.email = email
 
         self.password = password
+        self.image = image
 
 
     def save(self):
@@ -35,6 +37,7 @@ class User:
         'username' :self.username,
         'email' :self.email,
         'password' :self.password,
+        'image': self.image
         }
 
 

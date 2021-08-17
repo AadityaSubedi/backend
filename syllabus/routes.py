@@ -7,6 +7,7 @@ from json import loads
 from bson.json_util import dumps
 from utils import helper_functions as hf
 from utils import file_helper_functions as fhf
+from . import helper_functions as shf
 
 from database import DB
 
@@ -24,6 +25,10 @@ class OneProgram(Resource):
         try:
 
             program = DB.find_one(Program.collection, {'code':code})
+
+            # populate the subject field
+            # print(program)
+            program = shf.populate_subjects(program) 
 
             return (hf.success(
                     "program fetch",
