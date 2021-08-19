@@ -125,7 +125,7 @@ class Programs(Resource):
 
 @syllabus_api.resource("/levels")
 class Levels(Resource):
-    def put(self):
+    def sample(self):
         try:
 
             inputData = {
@@ -169,7 +169,7 @@ class Levels(Resource):
         try:
 
             inputData = {
-                'code': "sample code",
+                'code': "SAMPLE CODE",
                 'name': "sample name",
                 'programs': ["BCT", "BCE"],
 
@@ -235,8 +235,10 @@ class OneLevel(Resource):
         try:
 
 
-            print("meeeeeeeeeeeeeee")
-            _ = DB.delete_one(Level.collection, {'_id':ObjectId(id)})
+            # print("meeeeeeeeeeeeeee")
+            # _ = DB.delete_one(Level.collection, {'_id':ObjectId(id)})
+            _ = DB.delete_one(Level.collection, {'code':str.upper(id)})
+
 
 
 
@@ -257,6 +259,36 @@ class OneLevel(Resource):
                     500
                     )
 
+
+    def get(self,id):
+        try:
+
+            # program = DB.find_one(Program.collection, {'_id':ObjectId(id)})
+            level = DB.find_one(Level.collection, {'code':str.upper(id)})
+
+
+            # populate the subject field
+            level = shf.populate_programs(level) 
+
+
+            return (hf.success(
+                    "program fetch",
+                    "program fetched succesfully",
+                    loads(dumps(level))
+                    # loads(dumps(a))
+
+                    ),
+                    200
+                    )
+
+        except Exception as e:
+            return (hf.failure(
+
+                    "program fetch",
+                    str(e),
+                    ),
+                    500
+                    )
 
 
 
