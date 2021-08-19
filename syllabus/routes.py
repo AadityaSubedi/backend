@@ -1,3 +1,4 @@
+from bson.objectid import ObjectId
 from flask_restful import Resource
 from . import syllabus_api
 from flask import Flask, request
@@ -19,16 +20,16 @@ from .models import Program
 from syllabus import programs
 
 
-@syllabus_api.resource("/program/<string:code>")
+@syllabus_api.resource("/program/<string:id>")
 class OneProgram(Resource):
-    def get(self,code):
+    def get(self,id):
         try:
 
-            program = DB.find_one(Program.collection, {'code':code})
+            program = DB.find_one(Program.collection, {'_id':ObjectId(id)})
 
             # populate the subject field
-            # print(program)
             program = shf.populate_subjects(program) 
+
 
             return (hf.success(
                     "program fetch",
@@ -180,6 +181,40 @@ class Levels(Resource):
                     ),
                     500
                     )
+
+
+
+@syllabus_api.resource("/level/<string:id>")
+class OneLevel(Resource):
+    def delete(self,id):
+        try:
+
+
+            print("meeeeeeeeeeeeeee")
+            _ = DB.delete_one(Level.collection, {'_id':ObjectId(id)})
+
+
+
+            return (hf.success(
+                    "level deletion",
+                    "level deleted succesfully",
+
+                    ),
+                    200
+                    )
+
+        except Exception as e:
+            return (hf.failure(
+
+                    "level deletion",
+                    str(e),
+                    ),
+                    500
+                    )
+
+
+
+
 
 
 @syllabus_api.resource("/subject/<string:code>")

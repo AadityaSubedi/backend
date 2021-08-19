@@ -1,3 +1,4 @@
+from typing import Union
 from database import DB
 
 
@@ -19,7 +20,7 @@ class User:
         username: str,
         email: str,
         password: str,
-        image:str
+        image:Union[str,None]
 
     ):
         self.username = username
