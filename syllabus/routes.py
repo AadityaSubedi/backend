@@ -25,7 +25,9 @@ class OneProgram(Resource):
     def get(self,id):
         try:
 
-            program = DB.find_one(Program.collection, {'_id':ObjectId(id)})
+            # program = DB.find_one(Program.collection, {'_id':ObjectId(id)})
+            program = DB.find_one(Program.collection, {'code':str.upper(id)})
+
 
             # populate the subject field
             program = shf.populate_subjects(program) 
@@ -123,7 +125,7 @@ class Programs(Resource):
 
 @syllabus_api.resource("/levels")
 class Levels(Resource):
-    def post(self):
+    def put(self):
         try:
 
             inputData = {
@@ -132,11 +134,54 @@ class Levels(Resource):
                 'programs': request.form.get('programs'),
 
             }
+            # inputData = request.get_json()
+            print(request.files)
             file = request.files['file']
             # handle file upload
-            filename = fhf.save_image(file)
+            if file:
+                filename = fhf.save_image(file)
             level = Level(
                 code=inputData["code"], name=inputData["name"], programs=inputData["programs"], image=str(filename))
+            inserted_level = level.save()
+
+            # return the command line output as the response
+
+            return (hf.success(
+                    "level insertion",
+                    "level inserted succesfully",
+
+                    ),
+                    200
+                    )
+
+        except Exception as e:
+            return (hf.failure(
+
+                    "level insertion",
+                    str(e),
+                    ),
+                    500
+                    )
+
+
+
+    def post(self):
+        try:
+
+            inputData = {
+                'code': "sample code",
+                'name': "sample name",
+                'programs': ["BCT", "BCE"],
+
+            }
+            # inputData = request.get_json()
+            # print(request.files)
+            # file = request.files['file']
+            # handle file upload
+            # if file:
+                # filename = fhf.save_image(file)
+            level = Level(
+                code=inputData["code"], name=inputData["name"], programs=inputData["programs"])
             inserted_level = level.save()
 
             # return the command line output as the response

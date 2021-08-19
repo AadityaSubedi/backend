@@ -22,8 +22,8 @@ class Level:
         self,
         code: str,
         name: str, 
-        image:str,
         programs: List[ObjectId],
+        image:str = "52cb0354-5838-4a3f-a9b3-c91e897bd3ce.jpg",
 
     ):
         self.code = code
