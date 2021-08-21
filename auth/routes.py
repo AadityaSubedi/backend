@@ -175,7 +175,7 @@ class Logout(Resource):
     def post(self):
         try:
             jti =get_jti()
-            # add this jti to  blacklist 
+            # TODO: add this jti to  blacklist 
             #  using redis or db
 
             # return the command line output as the response

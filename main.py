@@ -14,10 +14,15 @@ app.config['JWT_SECRET_KEY'] = 'will_edit_this_secret_key'
 
 
 @app.route('/images/<string:imagename>')
-def download_file(imagename):
+def download_image(imagename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                'images/'+imagename)
 
+
+@app.route('/files/<string:imagename>')
+def download_pdf(imagename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'],
+                               'files/'+imagename)
 
 jwt = JWTManager(app)
 

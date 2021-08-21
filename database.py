@@ -72,6 +72,31 @@ class DB:
         """
         return DB.database[collection].find_one(query, return_values)
 
+
+
+
+    @staticmethod
+    def find_one_and_update(
+        collection: str,
+        query: Mapping[str, Any],
+        data:dict,
+        action: str = "$set",
+        return_values: Union[Mapping[str, bool], List[str]] = None,
+    ) -> Optional[Mapping[str, Any]]:
+        """
+        Find a document which matches the query in the collection and update it.
+
+        Args:
+            collection (str): Collection Name
+            query (Mapping[str, Any], optional): filter query. Defaults to None.
+            return_values (Union[Mapping[str, bool], List[str]], optional):
+                The keys to return. Defaults to None.
+
+        Returns:
+            Optional[Mapping[str, Any]]: Returns the document if found else None
+        """
+        return DB.database[collection].find_one_and_update(query,{action: data}, return_values)
+
     @staticmethod
     def update_one(
         collection: str,

@@ -17,21 +17,18 @@ from .levels import levels
 from .subject import subject
 from .models import Level, Subject
 from .models import Program
-from syllabus import programs
 
 
 @syllabus_api.resource("/program/<string:id>")
 class OneProgram(Resource):
-    def get(self,id):
+    def get(self, id):
         try:
 
             # program = DB.find_one(Program.collection, {'_id':ObjectId(id)})
-            program = DB.find_one(Program.collection, {'code':str.upper(id)})
-
+            program = DB.find_one(Program.collection, {'code': str.upper(id)})
 
             # populate the subject field
-            program = shf.populate_subjects(program) 
-
+            program = shf.populate_subjects(program)
 
             return (hf.success(
                     "program fetch",
@@ -163,8 +160,6 @@ class Levels(Resource):
                     500
                     )
 
-
-
     def post(self):
         try:
 
@@ -179,7 +174,7 @@ class Levels(Resource):
             # file = request.files['file']
             # handle file upload
             # if file:
-                # filename = fhf.save_image(file)
+            # filename = fhf.save_image(file)
             level = Level(
                 code=inputData["code"], name=inputData["name"], programs=inputData["programs"])
             inserted_level = level.save()
@@ -228,19 +223,14 @@ class Levels(Resource):
                     )
 
 
-
 @syllabus_api.resource("/level/<string:id>")
 class OneLevel(Resource):
-    def delete(self,id):
+    def delete(self, id):
         try:
 
-
             # print("meeeeeeeeeeeeeee")
-            # _ = DB.delete_one(Level.collection, {'_id':ObjectId(id)})
-            _ = DB.delete_one(Level.collection, {'code':str.upper(id)})
-
-
-
+            _ = DB.delete_one(Level.collection, {'_id': ObjectId(id)})
+            # _ = DB.delete_one(Level.collection, {'code':str.upper(id)})
 
             return (hf.success(
                     "level deletion",
@@ -259,17 +249,14 @@ class OneLevel(Resource):
                     500
                     )
 
-
-    def get(self,id):
+    def get(self, id):
         try:
 
             # program = DB.find_one(Program.collection, {'_id':ObjectId(id)})
-            level = DB.find_one(Level.collection, {'code':str.upper(id)})
-
+            level = DB.find_one(Level.collection, {'code': str.upper(id)})
 
             # populate the subject field
-            level = shf.populate_programs(level) 
-
+            level = shf.populate_programs(level)
 
             return (hf.success(
                     "program fetch",
@@ -290,8 +277,40 @@ class OneLevel(Resource):
                     500
                     )
 
+    def put(self, id):
+        try:
 
+            data = request.form
+            data = {**data, 'programs': loads(data['programs'])}
+            # print(data)
 
+            # print("me")
+            file = request.files.get('file')
+            # handle file upload
+            if file:
+                filename = fhf.save_image(file)
+                data['image'] = filename
+
+            # image xa vane xuttai handle garne hai
+            
+            oldLevel = DB.find_one_and_update(Level.collection, {'_id': ObjectId(id)}, data)
+            fhf.remove_image(oldLevel['image'])
+            return (hf.success(
+                    "level update",
+                    "level update succesfully",
+
+                    ),
+                    200
+                    )
+
+        except Exception as e:
+            return (hf.failure(
+
+                    "level deletion",
+                    str(e),
+                    ),
+                    500
+                    )
 
 
 @syllabus_api.resource("/subject/<string:code>")
