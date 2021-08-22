@@ -50,31 +50,77 @@ class OneProgram(Resource):
                     )
 
 
+
+    def put(self, id):
+        try:
+
+            data = request.form
+            print(data)
+            return
+
+            data = {**data, 'semesters': loads(data['semesters'])}
+            # print("me")
+            file = request.files.get('file')
+            # handle file upload
+            if file:
+                filename = fhf.save_image(file)
+                data['image'] = filename
+
+            # image xa vane xuttai handle garne hai
+
+            oldLevel = DB.find_one_and_update(
+                Level.collection, {'_id': ObjectId(id)}, data)
+
+            if file:
+                fhf.remove_image(oldLevel['image'])
+                
+            return (hf.success(
+                    "level update",
+                    "level update succesfully",
+
+                    ),
+                    200
+                    )
+
+        except Exception as e:
+            return (hf.failure(
+
+                    "level deletion",
+                    str(e),
+                    ),
+                    500
+                    )
+
+
+
 @syllabus_api.resource("/programs")
 class Programs(Resource):
     def post(self):
         try:
             inputData = {
-                'code': request.form.get('code'),
-                'name': request.form.get('name'),
-                'description': request.form.get('description'),
-                'semesters': loads(request.form.get('semesters'))
-                # 'semesters':{ '1':[],
-                #               '2':[]
-                #               '3':[]
-                # }
+                'code': "CODE",
+                'name': "sampleName",
+                'description': "Description",
+                'semesters': {'1': {"subjects": []}},
+                'level': request.get_json().get('levelCode')
+
 
             }
 
-            file = request.files['file']
+            # file = request.files['file']
             # handle file upload
-            filename = fhf.save_image(file)
+            # filename = fhf.save_image(file)
 
 # check's the validiity of code here hai
 
             program = Program(
-                code=inputData["code"], name=inputData["name"], image=filename, description=inputData["description"], semesters=inputData["semesters"])
+                code=inputData["code"], name=inputData["name"], description=inputData["description"], level=inputData["level"], semesters=inputData["semesters"],)  # image=filename)
             inserted_program = program.save()
+
+            # if level exist, update the current level ,
+            if inputData["level"]:
+                DB.update_one(Level.collection, {"code": inputData["level"]}, {
+                              'programs': inputData["code"]}, "$push")
 
             # return the command line output as the response
             return (hf.success(
@@ -292,9 +338,13 @@ class OneLevel(Resource):
                 data['image'] = filename
 
             # image xa vane xuttai handle garne hai
-            
-            oldLevel = DB.find_one_and_update(Level.collection, {'_id': ObjectId(id)}, data)
-            fhf.remove_image(oldLevel['image'])
+
+            oldLevel = DB.find_one_and_update(
+                Level.collection, {'_id': ObjectId(id)}, data)
+
+            if file:
+                fhf.remove_image(oldLevel['image'])
+
             return (hf.success(
                     "level update",
                     "level update succesfully",

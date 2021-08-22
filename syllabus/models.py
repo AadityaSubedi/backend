@@ -70,13 +70,15 @@ class Program:
         self,
         code: str,
         name: str,
-        image:str,
         description:str,
         semesters: dict,
+        level:str=None,
+        image:str = "sample.jpg",
 
     ):
         self.code = code
         self.name = name
+        self.level = level
         self.image = image
 
         self.description = description
@@ -90,6 +92,7 @@ class Program:
         return {
         'code' :self.code,
         'name' :self.name,
+        'level':self.level,
         'image':self.image,
         'description' :self.description,
         'semesters' :self.semesters,
