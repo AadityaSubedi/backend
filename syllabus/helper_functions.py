@@ -15,8 +15,8 @@ def populate_subjects(program: dict) -> dict:
     semesters = {}
     for key, value in program['semesters'].items():
         semesters[key] = {}
-        semesters[key]['subjects'] = [DB.find_one(
-            Subject.collection, {'code': subject}) for subject in value['subjects']]
+        semesters[key]['subjects'] = list(filter(None, [DB.find_one(
+            Subject.collection, {'code': subject}) for subject in value['subjects']]))
     program['semesters'] =semesters
 
     return program
@@ -34,8 +34,8 @@ def populate_programs(level: dict) -> dict:
         dict: program populated with dict
     """
 
-    programs  = [ DB.find_one(
-            Program.collection, {'code': program}) for program in  level['programs']]
+    programs  = list(filter(None, [ DB.find_one(
+            Program.collection, {'code': program}) for program in  level['programs']]))
 
 
     return {**level, 'programs':programs}

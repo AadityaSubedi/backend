@@ -2,6 +2,7 @@ from bson.objectid import ObjectId
 from flask_restful import Resource
 from . import syllabus_api
 from flask import Flask, request
+from datetime import datetime
 
 
 from json import loads
@@ -49,8 +50,6 @@ class OneProgram(Resource):
                     500
                     )
 
-
-
     def put(self, id):
         try:
 
@@ -66,26 +65,24 @@ class OneProgram(Resource):
 
             # image xa vane xuttai handle garne hai
 
-
-            oldProgram= DB.find_one_and_update(
+            oldProgram = DB.find_one_and_update(
                 Program.collection, {'_id': ObjectId(id)}, data)
 
             # update the level with new program code
             if data['level'] and data["code"] != oldProgram["code"]:
                 DB.update_one(
                     Level.collection, {'code': data['level']}, {
-                              'programs': data["code"]}, "$push")
+                        'programs': data["code"]}, "$push")
                 DB.update_one(
                     Level.collection, {'code': data['level']}, {
-                              'programs': oldProgram["code"]}, "$pull")
-
+                        'programs': oldProgram["code"]}, "$pull")
 
                 # DB.update_one(Level.collection, {"code": inputData["level"]}, {
                 #               'programs': inputData["code"]}, "$push")
 
             if file:
                 fhf.remove_image(oldProgram['image'])
-                
+
             return (hf.success(
                     "level update",
                     "level update succesfully",
@@ -102,7 +99,6 @@ class OneProgram(Resource):
                     ),
                     500
                     )
-
 
 
 @syllabus_api.resource("/programs")
@@ -375,30 +371,121 @@ class OneLevel(Resource):
                     )
 
 
-@syllabus_api.resource("/subject/<string:code>")
+@syllabus_api.resource("/subject/<string:id>")
 class OneSubject(Resource):
-    def get(self, code):
 
-        # return the command line output as the reesponse
-        return {'data': subject}
+    def get(self, id):
+        try:
+
+            # program = DB.find_one(Program.collection, {'_id':ObjectId(id)})
+            subject = DB.find_one(Subject.collection, {'code': str.upper(id)})
+
+            return (hf.success(
+                    "program fetch",
+                    "program fetched succesfully",
+                    loads(dumps(subject))
+                    # loads(dumps(a))
+
+                    ),
+                    200
+                    )
+
+        except Exception as e:
+            return (hf.failure(
+
+                    "program fetch",
+                    str(e),
+                    ),
+                    500
+                    )
+
+    def delete(self, id):
+        try:
+
+            # print("meeeeeeeeeeeeeee")
+            _ = DB.find_one_and_delete(
+                Subject.collection, {'_id': ObjectId(id)})
+            # _ = DB.delete_one(Level.collection, {'code':str.upper(id)})
+
+# db.inventory.find( { tags: "red" } )
+#
+            # _ = DB.update_one(Program.collection,{'subjects':_["code"]},{})
+
+            # write the python script to iterate over all the programs, and remove this
+            # deleted subject searching over each semesters of each programs, (this is very tedious)
+
+            return (hf.success(
+                    "level deletion",
+                    "level deleted succesfully",
+
+                    ),
+                    200
+                    )
+
+        except Exception as e:
+            return (hf.failure(
+
+                    "level deletion",
+                    str(e),
+                    ),
+                    500
+                    )
+
+    def put(self, id):
+        try:
+
+            data = request.form
+
+            # updatedSubject = {'name': data["name"],
+            # 'code': data["code"],
+            # }
+            # print("me")
+            file = request.files.get('file')
+            # handle file upload
+            filename = None
+            if file:
+                filename = fhf.save_pdf(file)
+
+            if data['revised']:
+                revisedSyllabus = {
+                    'theory': 100,
+                    'practical': 50,
+                    'teaching': 12,
+                    'batch': datetime.now().year,
+                    'remarks': data['remarks'],
+                    'filename': filename
+                }
+                actionData = {"$set": {"name": data["name"], "code": data["code"]}, "$push": {
+                    "syllabus": revisedSyllabus}}
+                _ = DB.update_one_multiple_actions(
+                    Subject.collection, {'_id': ObjectId(id)}, actionData)
+
+            return (hf.success(
+                    "level update",
+                    "level update succesfully",
+
+                    ),
+                    200
+                    )
+
+        except Exception as e:
+            return (hf.failure(
+
+                    "level deletion",
+                    str(e),
+                    ),
+                    500
+                    )
 
 
 @syllabus_api.resource("/subjects")
 class Subjects(Resource):
     def post(self):
         try:
-            inputData = {
-                'code': request.form.get('code'),
-                'name': request.form.get('name'),
-                'level': request.form.get('level'),
 
-            }
-            file = request.files['file']
-            # handle file upload
-            filename = fhf.save_pdf(file)
-            subject = Subject(
-                code=inputData["code"], name=inputData["name"], level=inputData["level"], filename=str(filename))
-            inserted_subject = subject.save()
+            # print("a")
+            subject = Subject()
+            _ = subject.save()
 
             # return the command line output as the response
             return (hf.success(
@@ -413,6 +500,56 @@ class Subjects(Resource):
             return (hf.failure(
 
                     "subject insertion",
+                    str(e),
+                    ),
+                    500
+                    )
+
+    def put(self, id):
+        try:
+
+            data = request.form
+
+            data = {**data, 'semesters': loads(data['semesters'])}
+            # print("me")
+            file = request.files.get('file')
+            # handle file upload
+            if file:
+                filename = fhf.save_image(file)
+                data['image'] = filename
+
+            # image xa vane xuttai handle garne hai
+
+            oldProgram = DB.find_one_and_update(
+                Program.collection, {'_id': ObjectId(id)}, data)
+
+            # update the level with new program code
+            if data['level'] and data["code"] != oldProgram["code"]:
+                DB.update_one(
+                    Level.collection, {'code': data['level']}, {
+                        'programs': data["code"]}, "$push")
+                DB.update_one(
+                    Level.collection, {'code': data['level']}, {
+                        'programs': oldProgram["code"]}, "$pull")
+
+                # DB.update_one(Level.collection, {"code": inputData["level"]}, {
+                #               'programs': inputData["code"]}, "$push")
+
+            if file:
+                fhf.remove_image(oldProgram['image'])
+
+            return (hf.success(
+                    "level update",
+                    "level update succesfully",
+
+                    ),
+                    200
+                    )
+
+        except Exception as e:
+            return (hf.failure(
+
+                    "level deletion",
                     str(e),
                     ),
                     500
@@ -445,7 +582,7 @@ class Subjects(Resource):
 
 @syllabus_api.resource("/comments")
 class Comments(Resource):
-    def post(self):
+    def get(self):
 
         # return the command line output as the response
-        return {'data': subject}
+        return {'data': None}

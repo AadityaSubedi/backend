@@ -9,10 +9,10 @@ class Level:
 
     """
     {
-        code: str, level code 
-        name: str, level name 
-        programs: List[ObjectId], list of programs 
-        
+        code: str, level code
+        name: str, level name
+        programs: List[ObjectId], list of programs
+
     }
     """
 
@@ -21,9 +21,9 @@ class Level:
     def __init__(
         self,
         code: str,
-        name: str, 
+        name: str,
         programs: List[ObjectId],
-        image:str = "sample.jpg",
+        image: str = "sample.jpg",
 
     ):
         self.code = code
@@ -31,36 +31,30 @@ class Level:
         self.image = image
         self.programs = programs
 
-
     def save(self):
         return DB.insert_one(self.collection, data=self.json())
 
     def json(self):
         return {
-        'code' :self.code,
-        'name' :self.name,
-        'programs' :self.programs,
-        'image': self.image
+            'code': self.code,
+            'name': self.name,
+            'programs': self.programs,
+            'image': self.image
         }
-
-
-
-
-
 
 
 class Program:
 
     """
     {
-        code: str, level code 
-        name: str, level name 
+        code: str, level code
+        name: str, level name
         semseter:{
             <semester number>:{
                 List[ObjectId of Subject]
             }
         }
-        
+
     }
     """
 
@@ -70,10 +64,10 @@ class Program:
         self,
         code: str,
         name: str,
-        description:str,
+        description: str,
         semesters: dict,
-        level:str=None,
-        image:str = "sample.jpg",
+        level: str = None,
+        image: str = "sample.jpg",
 
     ):
         self.code = code
@@ -84,79 +78,67 @@ class Program:
         self.description = description
         self.semesters = semesters
 
-
     def save(self):
         return DB.insert_one(self.collection, data=self.json())
 
     def json(self):
         return {
-        'code' :self.code,
-        'name' :self.name,
-        'level':self.level,
-        'image':self.image,
-        'description' :self.description,
-        'semesters' :self.semesters,
+            'code': self.code,
+            'name': self.name,
+            'level': self.level,
+            'image': self.image,
+            'description': self.description,
+            'semesters': self.semesters,
         }
 
 
-
-
 class Subject:
-    
+
     """
     {
-        name: str, level code 
-        name: str, level name 
+        name: str, level code
+        name: str, level name
         semseter:{
             <semester number>:{
                 List[ObjectId of Subject]
             }
         }
-        
+
     }
     """
 
     collection = "subjects"
 
-    def __init__(
-        self,
-        code: str,
-        name: str,
-        level:str,
-        filename:str,
-        
+    def __init__(self):
 
-    ):
-        self.code = code
-        self.name = name
-        self.level =level
-        self.filename = filename
-
+        pass
 
     def save(self):
         return DB.insert_one(self.collection, data=self.json())
 
+    #    gd496163-a123-4a50-b05d-415d0e72c0c1
+
     def json(self):
+        print("json")
         return {
-        'code' :self.code,
-        'level':self.level,
-        'name' :self.name,
-        'filename' :self.filename,
+            'code': "CODE",
+            'name': "subjectName",
+            'syllabus': []
         }
 
 
 class Comment:
-    
+
     """
     {
-        name: str, level code 
-        name: str, level name 
+        name: str, level code
+        name: str, level name
         semseter:{
             <semester number>:{
                 List[ObjectId of Subject]
             }
         }
-        
+
     }
     """
 
@@ -165,23 +147,20 @@ class Comment:
     def __init__(
         self,
         text: str,
-        subjectId: str, 
-        programId:str,
-       
-        
+        subjectId: str,
+        programId: str,
 
     ):
         self.text = text
         self.subjectId = subjectId
-        self.programId =programId
-
+        self.programId = programId
 
     def save(self):
         return DB.insert_one(self.collection, data=self.json())
 
     def json(self):
         return {
-        'text': self.text ,
-        'subjectId': self.subjectId,
-        'programId' :self.programId
+            'text': self.text,
+            'subjectId': self.subjectId,
+            'programId': self.programId
         }

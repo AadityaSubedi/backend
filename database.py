@@ -169,6 +169,29 @@ class DB:
     # The following methods work on one or more documents of a collection.
     # Usually, we do not use these methods other than find_many.
     # Be careful when you use them.
+
+
+
+
+    @staticmethod
+    def find_one_and_delete(collection: str, query: Mapping[str, Any]) -> DeleteResult:
+        """
+        Deletes the first document of the collection which
+        matches the query.
+
+        Args:
+            collection (str): The collection to delete from
+            query (Mapping[str, Any]): The query to find the document
+
+        Returns:
+            DeleteResult: Information about deleted document
+        """
+        return DB.database[collection].find_one_and_delete(query)
+
+    # The following methods work on one or more documents of a collection.
+    # Usually, we do not use these methods other than find_many.
+    # Be careful when you use them.
+
     @staticmethod
     def insert_many(collection: str, data: Iterable[dict]) -> InsertManyResult:
         """
