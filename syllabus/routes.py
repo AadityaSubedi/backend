@@ -55,8 +55,6 @@ class OneProgram(Resource):
         try:
 
             data = request.form
-            print(data)
-            return
 
             data = {**data, 'semesters': loads(data['semesters'])}
             # print("me")
@@ -68,11 +66,25 @@ class OneProgram(Resource):
 
             # image xa vane xuttai handle garne hai
 
-            oldLevel = DB.find_one_and_update(
-                Level.collection, {'_id': ObjectId(id)}, data)
+
+            oldProgram= DB.find_one_and_update(
+                Program.collection, {'_id': ObjectId(id)}, data)
+
+            # update the level with new program code
+            if data['level'] and data["code"] != oldProgram["code"]:
+                DB.update_one(
+                    Level.collection, {'code': data['level']}, {
+                              'programs': data["code"]}, "$push")
+                DB.update_one(
+                    Level.collection, {'code': data['level']}, {
+                              'programs': oldProgram["code"]}, "$pull")
+
+
+                # DB.update_one(Level.collection, {"code": inputData["level"]}, {
+                #               'programs': inputData["code"]}, "$push")
 
             if file:
-                fhf.remove_image(oldLevel['image'])
+                fhf.remove_image(oldProgram['image'])
                 
             return (hf.success(
                     "level update",
@@ -101,7 +113,7 @@ class Programs(Resource):
                 'code': "CODE",
                 'name': "sampleName",
                 'description': "Description",
-                'semesters': {'1': {"subjects": []}},
+                'semesters': {'1': {"subjects": []}, '2': {"subjects": []}},
                 'level': request.get_json().get('levelCode')
 
 
@@ -212,7 +224,7 @@ class Levels(Resource):
             inputData = {
                 'code': "SAMPLE CODE",
                 'name': "sample name",
-                'programs': ["BCT", "BCE"],
+                'programs': [],
 
             }
             # inputData = request.get_json()
