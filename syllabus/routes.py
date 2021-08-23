@@ -586,3 +586,30 @@ class Comments(Resource):
 
         # return the command line output as the response
         return {'data': None}
+
+
+@syllabus_api.resource("/search/<string:searchBy>/<string:searchOn>")
+class Search(Resource):
+    def get(self, searchBy, searchOn):
+        try:
+
+            # program = DB.find_one(Program.collection, {'_id':ObjectId(id)})
+
+            program = DB.find_many(Subject.collection, { searchBy: { "$regex" : searchOn , "$options" : "i"}} )
+
+
+            return (hf.success(
+                    "search fetch",
+                    "search fetched succesfully",
+                    loads(dumps(program))
+                    ),
+                    200
+                    )
+
+        except Exception as e:
+            return (hf.failure(
+                    "search fetch",
+                    str(e),
+                    ),
+                    500
+                    )
