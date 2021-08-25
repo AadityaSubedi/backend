@@ -1,17 +1,41 @@
-from flask import Flask, Blueprint, send_from_directory
+from flask import Flask, Blueprint, send_from_directory, render_template
+from flask.templating import render_template_string
 from flask_jwt_extended import jwt_manager, JWTManager
+import jinja2
 from syllabus import syllabus_bp
 from flask_restful import Resource, Api
 from flask_cors import CORS
 from auth import user_bp
+import os
+
+
+
 UPLOAD_FOLDER = 'uploads'
 
+template_dir = os.path.dirname(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+template_dir = os.path.join(template_dir, 'frontend')
+template_dir = os.path.join(template_dir, 'templates')
+# # hard coded absolute path for testing purposes
+# working = 'C:\Python34\pro\\frontend\\templates'
+# print(working == template_dir)
 app = Flask(__name__)
+
+
+
+
 app.register_blueprint(syllabus_bp)
 app.register_blueprint(user_bp)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['JWT_SECRET_KEY'] = 'will_edit_this_secret_key'
 
+
+
+
+
+@app.route("/")
+def hello():
+    print(app.template_folder)
+    return render_template("index.html")
 
 @app.route('/images/<string:imagename>')
 def download_image(imagename):
