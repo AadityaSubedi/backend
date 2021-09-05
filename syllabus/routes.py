@@ -432,50 +432,75 @@ class OneSubject(Resource):
                     )
 
     def put(self, id):
-        try:
+        # try:
 
-            data = request.form
+        data = request.form
 
-            # updatedSubject = {'name': data["name"],
-            # 'code': data["code"],
+        # updatedSubject = {'name': data["name"],
+        # 'code': data["code"],
+        # }
+        # print("me")
+
+        print(data)
+        file = request.files.get('file')
+        # handle file upload
+        filename = None
+        if file:
+            filename = fhf.save_pdf(file)
+
+        newSyllabus = {
+            'theory': 100,
+            'practical': 50,
+            'teaching': 12,
+            # 'batch': datetime.now().year,
+            'remarks': data['remarks'],
+            'filename': filename
+        }
+        revised = loads(data['revised'].lower())
+        if revised:
+            newSyllabus["batch"] = datetime.now().year
+            # {
+            #     'theory': 100,
+            #     'practical': 50,
+            #     'teaching': 12,
+            #     'batch': datetime.now().year,
+            #     'remarks': data['remarks'],
+            #     'filename': filename
             # }
-            # print("me")
-            file = request.files.get('file')
-            # handle file upload
-            filename = None
-            if file:
-                filename = fhf.save_pdf(file)
+            actionData = {"$set": {"name": data["name"], "code": data["code"]}, "$push": {
+                "syllabus": newSyllabus}}
+            print("ffffffk")
+            _ = DB.update_one_multiple_actions(
+                Subject.collection, {'_id': ObjectId(id)}, actionData)
+        else:
+            print("else partttttttttttttttttttttttttttttttttttttttt")
+            newSyllabus["batch"] = int(data["batch"])
+            actionData = {"$set": {"name": data["name"], "code": data["code"]}, "$pull": {
+                "syllabus": {"batch": newSyllabus["batch"]}}}
+            _ = DB.update_one_multiple_actions(
+                Subject.collection, {'_id': ObjectId(id)}, actionData)
+            print(_)
+            _ = DB.update_one(
+                Subject.collection, {'_id': ObjectId(id)}, {"syllabus": newSyllabus}, "$push")
 
-            if data['revised']:
-                revisedSyllabus = {
-                    'theory': 100,
-                    'practical': 50,
-                    'teaching': 12,
-                    'batch': datetime.now().year,
-                    'remarks': data['remarks'],
-                    'filename': filename
-                }
-                actionData = {"$set": {"name": data["name"], "code": data["code"]}, "$push": {
-                    "syllabus": revisedSyllabus}}
-                _ = DB.update_one_multiple_actions(
-                    Subject.collection, {'_id': ObjectId(id)}, actionData)
+            # { $pull: { results: { answers: { $elemMatch: { q: 2, a: { $gte: 8 } } } } } },
 
-            return (hf.success(
-                    "level update",
-                    "level update succesfully",
+        return (hf.success(
+                "level update",
+                "level update succesfully",
 
-                    ),
-                    200
-                    )
+                ),
+                200
+                )
 
-        except Exception as e:
-            return (hf.failure(
+        # except Exception as e:
+        return (hf.failure(
 
-                    "level deletion",
-                    str(e),
-                    ),
-                    500
-                    )
+                "level deletion",
+                str(e),
+                ),
+                500
+                )
 
 
 @syllabus_api.resource("/subjects")
@@ -595,8 +620,8 @@ class Search(Resource):
 
             # program = DB.find_one(Program.collection, {'_id':ObjectId(id)})
 
-            program = DB.find_many(Subject.collection, { searchBy: { "$regex" : searchOn , "$options" : "i"}} )
-
+            program = DB.find_many(Subject.collection, {searchBy: {
+                                   "$regex": searchOn, "$options": "i"}})
 
             return (hf.success(
                     "search fetch",
